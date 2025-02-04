@@ -51,8 +51,7 @@ export default function GoogleDriveClone() {
 
   useEffect(() => {
     setMounted(true)
-    setTheme("dark") // Set default theme to dark
-  }, [setTheme])
+  }, [])
 
   const openFolder = (folderName: string) => {
     setCurrentFolder(folderName)
@@ -104,10 +103,10 @@ export default function GoogleDriveClone() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
             className="ml-2"
           >
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {mounted && (theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />)}
           </Button>
         </div>
         <Button className="w-full mb-4" onClick={() => alert("Upload functionality not implemented in this demo.")}>
