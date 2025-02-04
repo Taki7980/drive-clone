@@ -1,37 +1,151 @@
-import Link from "next/link";
+"use client"
 
-export default function HomePage() {
+import { useState, useEffect } from "react"
+import { Button } from "~/components/ui/button"
+import { Input } from "~/components/ui/input"
+import { FolderIcon, FileIcon, Upload, Home, Clock, Star, Trash, Sun, Moon } from "lucide-react"
+import { useTheme } from "next-themes"
+
+const mockData = {
+  root: [
+    {
+      type: "folder",
+      name: "Documents",
+      contents: [
+        { type: "file", name: "Resume.pdf", link: "#" },
+        { type: "file", name: "Cover Letter.docx", link: "#" },
+      ],
+    },
+    {
+      type: "folder",
+      name: "Images",
+      contents: [
+        { type: "file", name: "Vacation.jpg", link: "#" },
+        { type: "file", name: "Family.png", link: "#" },
+      ],
+    },
+    { type: "file", name: "Project Plan.xlsx", link: "#" },
+    { type: "file", name: "Meeting Notes.txt", link: "#" },
+  ],
+}
+
+export default function GoogleDriveClone() {
+  const [currentFolder, setCurrentFolder] = useState("root")
+  const [breadcrumbs, setBreadcrumbs] = useState(["My Drive"])
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    setTheme("dark") // Set default theme to dark
+  }, [setTheme])
+
+  const openFolder = (folderName) => {
+    setCurrentFolder(folderName)
+    setBreadcrumbs([...breadcrumbs, folderName])
+  }
+
+  const goBack = () => {
+    if (breadcrumbs.length > 1) {
+      const newBreadcrumbs = breadcrumbs.slice(0, -1)
+      setBreadcrumbs(newBreadcrumbs)
+      setCurrentFolder(
+        newBreadcrumbs[newBreadcrumbs.length - 1] === "My Drive" ? "root" : newBreadcrumbs[newBreadcrumbs.length - 1],
+      )
+    }
+  }
+
+  const renderContents = (contents) => {
+    return contents.map((item, index) => (
+      <div
+        key={index}
+        className="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer"
+      >
+        {item.type === "folder" ? (
+          <div onClick={() => openFolder(item.name)} className="flex items-center">
+            <FolderIcon className="w-5 h-5 mr-2 text-blue-500" />
+            <span>{item.name}</span>
+          </div>
+        ) : (
+          <a href={item.link} className="flex items-center">
+            <FileIcon className="w-5 h-5 mr-2 text-gray-500" />
+            <span>{item.name}</span>
+          </a>
+        )}
+      </div>
+    ))
+  }
+
+  if (!mounted) return null
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-        </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
+    <div className="flex h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      {/* Sidebar */}
+      <div className="w-64 bg-gray-50 dark:bg-gray-800 p-4 border-r border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <img src="/placeholder.svg?height=40&width=40" alt="Google Drive" className="w-10 h-10 mr-2" />
+            <span className="text-xl font-semibold">Google Drive</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="ml-2"
           >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </Button>
+        </div>
+        <Button className="w-full mb-4" onClick={() => alert("Upload functionality not implemented in this demo.")}>
+          <Upload className="w-4 h-4 mr-2" />
+          New
+        </Button>
+        <nav>
+          <ul className="space-y-2">
+            <li>
+              <Button variant="ghost" className="w-full justify-start">
+                <Home className="w-4 h-4 mr-2" /> My Drive
+              </Button>
+            </li>
+            <li>
+              <Button variant="ghost" className="w-full justify-start">
+                <Clock className="w-4 h-4 mr-2" /> Recent
+              </Button>
+            </li>
+            <li>
+              <Button variant="ghost" className="w-full justify-start">
+                <Star className="w-4 h-4 mr-2" /> Starred
+              </Button>
+            </li>
+            <li>
+              <Button variant="ghost" className="w-full justify-start">
+                <Trash className="w-4 h-4 mr-2" /> Trash
+              </Button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 p-6">
+        <div className="mb-4">
+          <Input type="text" placeholder="Search in Drive" className="w-full max-w-md" />
+        </div>
+        <div className="mb-4">
+          <Button variant="ghost" onClick={goBack} disabled={breadcrumbs.length === 1}>
+            Back
+          </Button>
+          <span className="ml-2">{breadcrumbs.join(" > ")}</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {renderContents(
+            currentFolder === "root"
+              ? mockData.root
+              : mockData.root.find((f) => f.name === currentFolder)?.contents || [],
+          )}
         </div>
       </div>
-    </main>
-  );
+    </div>
+  )
 }
+
