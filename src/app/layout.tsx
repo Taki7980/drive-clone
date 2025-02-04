@@ -1,6 +1,6 @@
-import "./globals.css"
+import "~/styles/globals.css";
 import { Inter } from "next/font/google"
-import { Providers } from "./providers"
+import { Providers } from "~/lib/provider"
 import type React from "react" // Added import for React
 
 const inter = Inter({ subsets: ["latin"] })
