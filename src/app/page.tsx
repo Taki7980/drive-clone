@@ -5,8 +5,22 @@ import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { FolderIcon, FileIcon, Upload, Home, Clock, Star, Trash, Sun, Moon } from "lucide-react"
 import { useTheme } from "next-themes"
+import Image from "next/image"
 
-const mockData = {
+// Add these interfaces at the top of the file after the imports
+interface FileItem {
+  type: "file"
+  name: string
+  link: string
+}
+
+interface FolderItem {
+  type: "folder"
+  name: string
+  contents: (FileItem | FolderItem)[]
+}
+
+const mockData: { root: (FileItem | FolderItem)[] } = {
   root: [
     {
       type: "folder",
@@ -30,8 +44,8 @@ const mockData = {
 }
 
 export default function GoogleDriveClone() {
-  const [currentFolder, setCurrentFolder] = useState("root")
-  const [breadcrumbs, setBreadcrumbs] = useState(["My Drive"])
+  const [currentFolder, setCurrentFolder] = useState<string>("root")
+  const [breadcrumbs, setBreadcrumbs] = useState<string[]>(["My Drive"])
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -40,7 +54,7 @@ export default function GoogleDriveClone() {
     setTheme("dark") // Set default theme to dark
   }, [setTheme])
 
-  const openFolder = (folderName) => {
+  const openFolder = (folderName: string) => {
     setCurrentFolder(folderName)
     setBreadcrumbs([...breadcrumbs, folderName])
   }
@@ -50,12 +64,12 @@ export default function GoogleDriveClone() {
       const newBreadcrumbs = breadcrumbs.slice(0, -1)
       setBreadcrumbs(newBreadcrumbs)
       setCurrentFolder(
-        newBreadcrumbs[newBreadcrumbs.length - 1] === "My Drive" ? "root" : newBreadcrumbs[newBreadcrumbs.length - 1],
+        newBreadcrumbs[newBreadcrumbs.length - 1] === "My Drive" ? "root" : newBreadcrumbs[newBreadcrumbs.length - 1] ?? "root",
       )
     }
   }
 
-  const renderContents = (contents) => {
+  const renderContents = (contents: (FileItem | FolderItem)[]) => {
     return contents.map((item, index) => (
       <div
         key={index}
@@ -84,7 +98,7 @@ export default function GoogleDriveClone() {
       <div className="w-64 bg-gray-50 dark:bg-gray-800 p-4 border-r border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <img src="/placeholder.svg?height=40&width=40" alt="Google Drive" className="w-10 h-10 mr-2" />
+            <Image src="/placeholder.svg?height=40&width=40" alt="Google Drive" className="w-10 h-10 mr-2" width={40} height={40} />
             <span className="text-xl font-semibold">Google Drive</span>
           </div>
           <Button
@@ -141,7 +155,7 @@ export default function GoogleDriveClone() {
           {renderContents(
             currentFolder === "root"
               ? mockData.root
-              : mockData.root.find((f) => f.name === currentFolder)?.contents || [],
+              : (mockData.root.find((f): f is FolderItem => f.name === currentFolder && f.type === "folder")?.contents ?? [])
           )}
         </div>
       </div>
